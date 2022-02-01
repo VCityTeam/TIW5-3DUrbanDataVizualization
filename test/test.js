@@ -1,5 +1,5 @@
 const suite = require("testjs");
-const converter = require("./conversion.js");
+const { from3948to4326, from4326to3948 } = require(__dirname + "/../src/conversion.js");
 
 
 const testWithPrecision = (fct, values, test, precision) => {
@@ -29,7 +29,7 @@ suite.run({
 				'expected': [0.2746583, 48.1331005]
 			}
 		];
-		testWithPrecision(converter.from3948to4326, values, test, 0.000001);
+		testWithPrecision(from3948to4326, values, test, 0.000001);
 		test.done();
     },
 
@@ -49,7 +49,7 @@ suite.run({
 				'expected': [1697402.74, 7009461.95],
 			},
 		];
-		testWithPrecision(converter.from4326to3948, values, test, 0.01);
+		testWithPrecision(from4326to3948, values, test, 0.01);
 
 		test.done();
     }
