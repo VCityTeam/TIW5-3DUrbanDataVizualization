@@ -1,0 +1,87 @@
+{
+  "assetsManager": {
+    "sounds": {
+      "ballon_pop": {
+        "path": "./assets/sounds/ballon_pop.wav"
+      }
+    },
+    "models": {
+      "zeppelin": {
+        "path": "./assets/models/Zeppelin_Labex_IMU.glb",
+        "anchor": "center_min",
+        "rotation": { "x": 0, "y": 1.5707, "z": 0 }
+      },
+      "avatar": {
+        "path": "./assets/models/avatar_capuchon.glb",
+        "anchor": "center_min"
+      }
+    },
+    "worldScripts": {
+      "worldGameManager": {
+        "path": "./assets/worldScripts/worldGameManager.js"
+      },
+      "zeppelin": {
+        "path": "./assets/worldScripts/zeppelin.js"
+      },
+      "avatar": {
+        "path": "./assets/worldScripts/avatar.js"
+      }
+    },
+    "localScripts": {
+      "focus": {
+        "path": "./assets/localScripts/focus.js"
+      },
+      "commands": {
+        "path": "./assets/localScripts/commands.js"
+      },
+      "zeppelin": {
+        "path": "./assets/localScripts/zeppelin.js"
+      },
+      "updateElevationGround": {
+        "path": "./assets/localScripts/updateElevationGround.js"
+      }
+    }
+  },
+  "game": {
+    "fps": 30,
+    "shadowMapSize": 2046,
+    "sky": {
+      "path": "./assets/img/sky.jpg",
+      "color": {
+        "r": 0.4,
+        "g": 0.6,
+        "b": 0.8
+      },
+      "sun_position": {
+        "phi": 1,
+        "theta": 0.3
+      }
+    }
+  },
+  "itowns": {
+    "radiusExtent": 1000
+  },
+  "3DTilesLayers": [
+    {
+      "id": "3d-tiles-layer-building",
+      "url": "https://dataset-dl.liris.cnrs.fr/three-d-tiles-lyon-metropolis/Lyon_LOD/buildings/tileset.json",
+      "color": "0xFFFFFF"
+    },
+    {
+      "id": "3d-tiles-layer-relief",
+      "url": "./assets/3DTiles/relief/tileset.json",
+      "color": "0xd0ac7f"
+    },
+    {
+      "id": "3d-tiles-layer-road",
+      "url": "./assets/3DTiles/roads/tileset.json",
+      "color": "0x272727"
+    },
+    {
+      "id": "3d-tiles-layer-water",
+      "url": "./assets/3DTiles/water/tileset.json",
+      "color": "0x2ACAEA"
+    }
+  ],
+  "projection": "EPSG:3946"
+}
