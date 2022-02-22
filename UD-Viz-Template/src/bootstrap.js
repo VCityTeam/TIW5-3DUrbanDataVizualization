@@ -148,9 +148,19 @@ app.start('../assets/config/config.json').then((config) => {
   
   app.deckglLayers();
 
-  // document.querySelector("#viewerDiv").addEventListener('mousemove', (event) => {
-  //   console.log("mousemove: ", event);
-  // })
+  // geocodingView.addPin(geocodingView.getWorldCoordinates(45.7557226, 4.830938));
+
+  const pin1 = geocodingView.getWorldCoordinates(45.76525, 4.8775179);
+  geocodingView.addPin(pin1);
+  geocodingView.addPin(pin1);
+  geocodingView.addPin(pin1);
+  geocodingView.addPin(pin1); 
+
+  // const pin2 = geocodingView.getWorldCoordinates(45.7432992, 4.8405543);
+  // geocodingView.addPin(pin2);
+  // geocodingView.addPin(pin2);
+  // geocodingView.addPin(pin2);
+  // geocodingView.addPin(pin2); 
 
 });
 

@@ -10,16 +10,18 @@ const $3DTemporalTileset = Widgets.$3DTemporalTileset;
 
 import './AllWidget.css';
 
-import { proj4 as proj } from 'proj4'
-
 let deckgl = undefined;
 
-console.log("proj4", proj4);
-console.log("proj", proj);
 
-
-
-
+// debug: prev positions
+let prev3946 = {
+  x: 0,
+  y: 0
+}
+let prev4326 = {
+  x: 0,
+  y: 0
+}
 
 /**
  * Represents the base HTML content of a demo for UD-Viz and provides methods to
@@ -673,39 +675,76 @@ export class AllWidget {
     this.controls = this.view.controls;
 
     let from3946to4326 = (coordinates) => {
-
-      console.log("from3946to4326.proj", proj4);
+      // console.log("from3946to4326.proj", proj4);
       return proj4.default('EPSG:3946', 'EPSG:4326', coordinates);
     }
     
     console.log("view", this.view);
     this.view.onMovementCallback = () => {
-      console.log("it works");
-      console.log("this.view", this.view);
-      console.log("deckgl: ", deckgl);
       if (deckgl == undefined) return;
 
+      
       const cam3D = this.view.camera.camera3D;
+      // const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
+      
+      console.log("[3946] position", cam3D.position);
 
-      const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
+      // if (prev3946.x != cam3D.position.x) {
+      //   console.log("[3946] delta.x", prev3946.x - cam3D.position.x);
+      //   prev3946.x = cam3D.position.x;
+      // }
+      
+        // if (prev3946.y != cam3D.position.y) {
+          // prev3946.y = cam3D.position.y;
+          // console.log("[3946] delta.y", prev3946.y - cam3D.position.y);
+        // }
 
       // ici on récupère des coordonées en 3948
+      // const coeff = 1.05;
       const pos = from3946to4326([cam3D.position.x, cam3D.position.y])
 
-      console.log("pos: ", pos);
+      console.log("[4326] position ", pos);
+      // if (prev4326.x != pos[0]) {
+      //   console.log("[4326] delta.x ", prev4326.x - pos[0]);
+      //   prev4326.x = pos[0];
+      // }
 
+      // if (prev4326.y != pos[1]) {
+      //   console.log("[4326] delta.y ", prev4326.y - pos[1]);
+      //   prev4326.y = pos[1];
+      // }
+
+      // console.log("isv: ", {
+      //   longitude: pos[0] * coeff - 0.242361839,
+      //   latitude: pos[1] * coeff - 0.242361839, 
+      //   zoom: Math.log((2 * magicNumber) / cameraItowns.position.z) / Math.log(2)
+      // });
+
+      const cameraItowns = this.view.camera.camera3D;
+      const dirCam = cameraItowns.getWorldDirection(new THREE.Vector3());
+      const axis = new THREE.Vector3(0, 0, -1);
+      const pitch = Math.acos(dirCam.dot(axis));
+
+
+      const magicNumber = 64118883.098724395;
+      const o = proj4
+        .default(this.config['projection'])
+        .inverse(cameraItowns.position.clone());
       deckgl.setProps({
         initialViewState: {
-          longitude: pos[0],
-          latitude: pos[1],
-          zoom: 12
+          // longitude: pos[0],
+          // latitude: pos[1],
+          longitude: o.x,
+          latitude: o.y,
+          zoom: Math.log((2 * magicNumber) / cameraItowns.position.z) / Math.log(2),
+          pitch: (pitch * 180) / Math.PI,
         }
       })
 
       // const newCoords = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
 
-      console.log("cam3D: ", cam3D);
-      console.log("prev: ", prev);
+      // console.log("cam3D: ", cam3D);
+      // console.log("prev: ", prev);
 
       // deckgl ne fonctionne qu'en 4326
       
@@ -852,22 +891,22 @@ export class AllWidget {
       {
         "type": "Feature",
         "properties": {
-          "nom": "CMP VAISE - CHINARD",
-          "numero_finess": "690009188",
+          "nom": "MAISON DU DEPARTEMENT",
+          "numero_finess": "690803994",
           "address": {
-            "postalCode": "69009",
-            "streetAddress": "2 Rue Chinard",
+            "postalCode": "69100",
+            "streetAddress": "136 Rue Louis Becker",
             "addressCountry": "FR",
-            "addressLocality": "Lyon 9e Arrondissement"
+            "addressLocality": "Villeurbanne"
           },
-          "insee": "69389",
-          "gid": 1
+          "insee": "69266",
+          "gid": 32
         },
         "geometry": {
           "type": "Point",
           "coordinates": [
-            4.806698,
-            45.778579
+            4.8775179,
+            45.76525
           ]
         }
       }];
@@ -893,8 +932,6 @@ export class AllWidget {
           // const newPos = prev;
           // newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
           
-          // console.log("onViewStateChange: ", viewState);
-
 
           // // newPos.range = 64118883.098724395 / (2**(viewState.zoom-1));
           // // newPos.range = 64118883 / (2**(viewState.zoom-1)); // 64118883 is Range at Z=1 
@@ -902,10 +939,10 @@ export class AllWidget {
           // // for some reason I cant access Math.clamp
           // newPos.tilt = this.clamp((90 - viewState.pitch), 0, 90); 
       
-          // itowns.CameraUtils.transformCameraToLookAtTarget(this.view, cam3D, newPos);
-          // this.view.notifyChange();
-          // cam3D.updateMatrixWorld();
-          // We can set pitch and bearing to 0 to disable tilting and turning 
+          // // itowns.CameraUtils.transformCameraToLookAtTarget(this.view, cam3D, newPos);
+          // // this.view.notifyChange();
+          // // cam3D.updateMatrixWorld();
+          // // We can set pitch and bearing to 0 to disable tilting and turning 
           // viewState.pitch = 0;
           // viewState.bearing = 0;
       
@@ -914,8 +951,8 @@ export class AllWidget {
         layers: [new LayersDeckGL.GeoJsonLayer(
           {
             id: 'GeoJsonLayer',
-            // data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
-            data: features,
+            data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
+            // data: features,
             extruded: true,
             filled: true,
             getElevation: 30,
