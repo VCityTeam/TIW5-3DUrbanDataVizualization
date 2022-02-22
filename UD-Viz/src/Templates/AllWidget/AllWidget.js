@@ -10,7 +10,16 @@ const $3DTemporalTileset = Widgets.$3DTemporalTileset;
 
 import './AllWidget.css';
 
+import { proj4 as proj } from 'proj4'
+
 let deckgl = undefined;
+
+console.log("proj4", proj4);
+console.log("proj", proj);
+
+
+
+
 
 /**
  * Represents the base HTML content of a demo for UD-Viz and provides methods to
@@ -586,6 +595,8 @@ export class AllWidget {
         ' +lat_0=46 +lon_0=3 +x_0=1700000 +y_0=5200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
     );
 
+    proj4.default.defs('EPSG:4326', '+title=WGS84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees');
+
     // Define geographic extent: CRS, min/max X, min/max Y
     // area should be one of the properties of the object extents in config file
     let min_x = parseInt(this.config['extents']['min_x']);
@@ -660,22 +671,44 @@ export class AllWidget {
 
     // Controls
     this.controls = this.view.controls;
+
+    let from3946to4326 = (coordinates) => {
+
+      console.log("from3946to4326.proj", proj4);
+      return proj4.default('EPSG:3946', 'EPSG:4326', coordinates);
+    }
     
     console.log("view", this.view);
     this.view.onMovementCallback = () => {
       console.log("it works");
+      console.log("this.view", this.view);
       console.log("deckgl: ", deckgl);
       if (deckgl == undefined) return;
 
-      
+      const cam3D = this.view.camera.camera3D;
+
+      const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
+
+      // ici on récupère des coordonées en 3948
+      const pos = from3946to4326([cam3D.position.x, cam3D.position.y])
+
+      console.log("pos: ", pos);
 
       deckgl.setProps({
         initialViewState: {
-          longitude: 4.828499,
-          latitude: 45.756026,
-          zoom: Math.random() > 0.5 ? 5 : 25
+          longitude: pos[0],
+          latitude: pos[1],
+          zoom: 12
         }
       })
+
+      // const newCoords = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
+
+      console.log("cam3D: ", cam3D);
+      console.log("prev: ", prev);
+
+      // deckgl ne fonctionne qu'en 4326
+      
     }
 
     // Set sky color to blue
@@ -815,6 +848,30 @@ export class AllWidget {
   }
 
   deckglLayers(){
+    const features = [
+      {
+        "type": "Feature",
+        "properties": {
+          "nom": "CMP VAISE - CHINARD",
+          "numero_finess": "690009188",
+          "address": {
+            "postalCode": "69009",
+            "streetAddress": "2 Rue Chinard",
+            "addressCountry": "FR",
+            "addressLocality": "Lyon 9e Arrondissement"
+          },
+          "insee": "69389",
+          "gid": 1
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            4.806698,
+            45.778579
+          ]
+        }
+      }];
+
     deckgl = new Deck({
         // mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         initialViewState: {
@@ -831,21 +888,21 @@ export class AllWidget {
         map: false,
         controller: true,
         onViewStateChange: ({viewState}) => {
-          const cam3D = this.view.camera.camera3D;
-          const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
-          const newPos = prev;
-          newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
+          // const cam3D = this.view.camera.camera3D;
+          // const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
+          // const newPos = prev;
+          // newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
           
-          console.log("onViewStateChange: ", viewState);
+          // console.log("onViewStateChange: ", viewState);
 
 
-          // newPos.range = 64118883.098724395 / (2**(viewState.zoom-1));
-          // newPos.range = 64118883 / (2**(viewState.zoom-1)); // 64118883 is Range at Z=1 
-          newPos.heading = viewState.bearing;
-          // for some reason I cant access Math.clamp
-          newPos.tilt = this.clamp((90 - viewState.pitch), 0, 90); 
+          // // newPos.range = 64118883.098724395 / (2**(viewState.zoom-1));
+          // // newPos.range = 64118883 / (2**(viewState.zoom-1)); // 64118883 is Range at Z=1 
+          // newPos.heading = viewState.bearing;
+          // // for some reason I cant access Math.clamp
+          // newPos.tilt = this.clamp((90 - viewState.pitch), 0, 90); 
       
-          itowns.CameraUtils.transformCameraToLookAtTarget(this.view, cam3D, newPos);
+          // itowns.CameraUtils.transformCameraToLookAtTarget(this.view, cam3D, newPos);
           // this.view.notifyChange();
           // cam3D.updateMatrixWorld();
           // We can set pitch and bearing to 0 to disable tilting and turning 
@@ -857,7 +914,8 @@ export class AllWidget {
         layers: [new LayersDeckGL.GeoJsonLayer(
           {
             id: 'GeoJsonLayer',
-            data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
+            // data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
+            data: features,
             extruded: true,
             filled: true,
             getElevation: 30,
@@ -882,4 +940,6 @@ export class AllWidget {
     return deckgl;
     }
   
+
+
 }
