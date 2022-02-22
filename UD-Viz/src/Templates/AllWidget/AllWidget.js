@@ -10,6 +10,8 @@ const $3DTemporalTileset = Widgets.$3DTemporalTileset;
 
 import './AllWidget.css';
 
+let deckgl = undefined;
+
 /**
  * Represents the base HTML content of a demo for UD-Viz and provides methods to
  * dynamically add module views.
@@ -639,6 +641,10 @@ export class AllWidget {
         tilt: tilt,
       },
     });
+
+    // this.view.eventToViewCoords((event) => {
+    //   console.log("eventToViewCoords", event);
+    // })
     this.layerManager = new Widgets.Components.LayerManager(this.view);
     // ********* 3D Elements
     // Lights
@@ -654,6 +660,23 @@ export class AllWidget {
 
     // Controls
     this.controls = this.view.controls;
+    
+    console.log("view", this.view);
+    this.view.onMovementCallback = () => {
+      console.log("it works");
+      console.log("deckgl: ", deckgl);
+      if (deckgl == undefined) return;
+
+      
+
+      deckgl.setProps({
+        initialViewState: {
+          longitude: 4.828499,
+          latitude: 45.756026,
+          zoom: Math.random() > 0.5 ? 5 : 25
+        }
+      })
+    }
 
     // Set sky color to blue
     this.view.mainLoop.gfxEngine.renderer.setClearColor(0x6699cc, 1);
@@ -792,7 +815,7 @@ export class AllWidget {
   }
 
   deckglLayers(){
-    return new Deck({
+    deckgl = new Deck({
         // mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         initialViewState: {
           longitude: 4.828491,
@@ -812,7 +835,10 @@ export class AllWidget {
           const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
           const newPos = prev;
           newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
-      
+          
+          console.log("onViewStateChange: ", viewState);
+
+
           // newPos.range = 64118883.098724395 / (2**(viewState.zoom-1));
           // newPos.range = 64118883 / (2**(viewState.zoom-1)); // 64118883 is Range at Z=1 
           newPos.heading = viewState.bearing;
@@ -851,6 +877,9 @@ export class AllWidget {
           }
         )]
       });
+    
+    console.log("deckglLayers: ", deckgl);
+    return deckgl;
     }
   
 }

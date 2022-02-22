@@ -1,6 +1,6 @@
 /** @format */
 
-import * as udviz from 'ud-viz';
+import * as udviz from '../../UD-Viz/dist/debug/udv';
 
 
 
@@ -43,6 +43,11 @@ app.start('../assets/config/config.json').then((config) => {
     app.view,
     app.controls
   );
+
+  console.log("app.controls", app.controls._handlerUpdate);
+  app.controls._handlerUpdate = () => {
+    console.log("update");
+  }
 
   ////// CONTRIBUTE EXTENSION
   new udviz.Widgets.Extensions.ContributeModule(
@@ -125,6 +130,9 @@ app.start('../assets/config/config.json').then((config) => {
     app.controls
   );
   app.addModuleView('cameraPositioner', cameraPosition);
+  
+  console.log("cameraPosition: ", cameraPosition);
+
 
   ////// LAYER CHOICE MODULE
   const layerChoice = new udviz.Widgets.LayerChoice(app.layerManager);
@@ -140,6 +148,9 @@ app.start('../assets/config/config.json').then((config) => {
   
   app.deckglLayers();
 
+  // document.querySelector("#viewerDiv").addEventListener('mousemove', (event) => {
+  //   console.log("mousemove: ", event);
+  // })
 
 });
 

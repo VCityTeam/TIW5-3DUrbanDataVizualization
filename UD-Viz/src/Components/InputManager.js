@@ -124,6 +124,7 @@ export class InputManager {
     const _this = this;
 
     const listener = function (event) {
+      console.log("addMouseInput/listener", event);
       if (!_this.pause) {
         cb(event);
       }
@@ -282,6 +283,7 @@ export class MouseState {
    * @returns {Boolean} true if the mouse is dragging, false otherwise
    */
   isDragging() {
+    console.log("isDragging: ", this.dragging);
     return this.dragging;
   }
 
