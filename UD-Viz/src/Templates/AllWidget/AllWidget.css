@@ -215,3 +215,9 @@ section {
 #docBrowserWindow {
     top: 50px;
 }
+
+.deck-tooltip{
+    color: #fff!important;
+    max-width:200px;
+    max-height: 150px;
+}

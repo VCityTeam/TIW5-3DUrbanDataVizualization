@@ -60,7 +60,7 @@ export class AllWidget {
     return /*html*/ `
     <style>
     #container {
-      position: fixed;
+    
       top: 0;
       left: 0;
       right: 0;
@@ -659,7 +659,7 @@ export class AllWidget {
     // Set sky color to blue
     this.view.mainLoop.gfxEngine.renderer.setClearColor(0x6699cc, 1);
 
-    // this.view.onMovementCallback = () => {
+    this.view.onMovementCallback = () => {
     //   if (deckgl == undefined) return;
 
     //   const cam3D = this.view.camera.camera3D;
@@ -706,7 +706,7 @@ export class AllWidget {
       // console.log("prev: ", prev);
 
       // deckgl ne fonctionne qu'en 4326
-    // }
+  }
   }
   /*
    * Updates the 3D view by notifying iTowns that it changed (e.g. because a layer has been added).
@@ -844,6 +844,20 @@ export class AllWidget {
 
   deckglLayers() {
 
+    const initialPos = [4.879038365526159, 45.75702216916448];
+
+    const inFlowColors = [
+      [255, 255, 204],
+      [199, 233, 180],
+      [127, 205, 187],
+      [65, 182, 196],
+      [29, 145, 192],
+      [34, 94, 168],
+      [12, 44, 132]
+    ];
+
+    const data = 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326';
+
     deckgl = new Deck({
       initialViewState: {
         longitude: 4.850915114844566,
@@ -853,6 +867,7 @@ export class AllWidget {
         pitch: 0,
         bearing: 0
       },
+      getTooltip: this.getTooltip,
       canvas: 'deck-canvas',
       width: '100%',
       height: '100%',
@@ -875,7 +890,7 @@ export class AllWidget {
       layers: [new LayersDeckGL.GeoJsonLayer(
         {
           id: 'GeoJsonLayer',
-          data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
+          data: data,
           extruded: true,
           filled: true,
           getElevation: 30,
@@ -897,8 +912,77 @@ export class AllWidget {
           filterRange: [69000, 69100],
           extensions: [new DataFilterExtension({filterSize: 1})]
         }
-      )]
+      )
+    ]
     });
+    
+    fetch(data)
+      .then(response => response.json())
+      .then(json => {
+          let d = json;
+          let arcs = Object.keys(d.features).map(toId => {
+          const f = d.features[toId];
+          return {
+                source: initialPos,
+                target: f.geometry.coordinates,
+                distance: this.distance(initialPos[0], initialPos[1], f.geometry.coordinates[0], f.geometry.coordinates[1] ,"K"),
+                code: f.properties.address.postalCode
+              };
+          });
+
+          arcs = arcs.filter(e => e.code <= 69100)
+          
+          const arcLayer = new LayersDeckGL.ArcLayer({
+            id: 'ArcLayer',
+            data: arcs,
+            pickable: true,
+            getWidth: 4,
+            getSourcePosition: d => d.source,
+            getTargetPosition: d => d.target,
+            getSourceColor: d => inFlowColors,
+            getTargetColor: d => [200, 10, 10],
+          });
+          deckgl.setProps({ layers: [... deckgl.props.layers, arcLayer] })
+      
+    });
+  }
+
+  getTooltip({ object }) {
+    return (
+      object && object.properties && {
+        html: `\
+      <div class="tooltips">Nom : ${object.properties.nom}<br>
+      Numéro finess : ${object.properties.numero_finess}<br>
+      Adresse : ${object.properties.address.streetAddress},  ${object.properties.address.postalCode}</div>
+  
+    `
+      } || object && object.distance && { html : `\
+      <div class="tooltips">Distance : ${object.distance} KM</div>
+      `
+      }
+    );
+  }
+
+  distance(lat1, lon1, lat2, lon2, unit) {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+      return 0;
+    }
+    else {
+      var radlat1 = Math.PI * lat1/180;
+      var radlat2 = Math.PI * lat2/180;
+      var theta = lon1-lon2;
+      var radtheta = Math.PI * theta/180;
+      var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+      if (dist > 1) {
+        dist = 1;
+      }
+      dist = Math.acos(dist);
+      dist = dist * 180/Math.PI;
+      dist = dist * 60 * 1.1515;
+      if (unit=="K") { dist = dist * 1.609344 }
+      if (unit=="N") { dist = dist * 0.8684 }
+      return dist.toFixed(2);
+    }
   }
 
 }
