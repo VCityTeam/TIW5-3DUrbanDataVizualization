@@ -35,6 +35,9 @@ export { LayersDeckGL };
 import { Deck } from '@deck.gl/core';
 export { Deck }
 
+import  { DataFilterExtension }  from '@deck.gl/extensions';
+export { DataFilterExtension }
+
 //jquery
 import * as jquery from 'jquery';
 export { jquery };

@@ -138,8 +138,74 @@ app.start('../assets/config/config.json').then((config) => {
   const about = new udviz.Widgets.AboutWindow();
   app.addModuleView('about', about);
   
+  
   app.deckglLayers();
 
+  const pin1 = geocodingView.getWorldCoordinates(45.749843, 4.823851);
+  geocodingView.addPin(pin1);
+  geocodingView.addPin(pin1);
+  geocodingView.addPin(pin1);
+  geocodingView.addPin(pin1);  
+  
+  const pin2 = geocodingView.getWorldCoordinates(45.7557226, 4.830938);
+  geocodingView.addPin(pin2);
+  geocodingView.addPin(pin2);
+  geocodingView.addPin(pin2);
+  geocodingView.addPin(pin2);  
+  
+  const pin3 = geocodingView.getWorldCoordinates(45.7590861, 4.8437646);
+  geocodingView.addPin(pin3);
+  geocodingView.addPin(pin3);
+  geocodingView.addPin(pin3);
+  geocodingView.addPin(pin3);  
+  
+  const pin4 = geocodingView.getWorldCoordinates(45.7590405, 4.8661112);
+  geocodingView.addPin(pin4);
+  geocodingView.addPin(pin4);
+  geocodingView.addPin(pin4);
+  geocodingView.addPin(pin4);  
+  
+  const pin5 = geocodingView.getWorldCoordinates(45.7758558, 4.8306441);
+  geocodingView.addPin(pin5);
+  geocodingView.addPin(pin5);
+  geocodingView.addPin(pin5);
+  geocodingView.addPin(pin5);  
+  
+  const pin6 = geocodingView.getWorldCoordinates(45.7344648, 4.869507);
+  geocodingView.addPin(pin6);
+  geocodingView.addPin(pin6);
+  geocodingView.addPin(pin6);
+  geocodingView.addPin(pin6);  
+  
+  const pin7 = geocodingView.getWorldCoordinates(45.7308834, 4.8537265);
+  geocodingView.addPin(pin7);
+  geocodingView.addPin(pin7);
+  geocodingView.addPin(pin7);
+  geocodingView.addPin(pin7);  
+  
+  const pin8 = geocodingView.getWorldCoordinates(45.7328251, 4.8740466);
+  geocodingView.addPin(pin8);
+  geocodingView.addPin(pin8);
+  geocodingView.addPin(pin8);
+  geocodingView.addPin(pin8);  
+  
+  const pin9 = geocodingView.getWorldCoordinates(45.7341481, 4.8753049);
+  geocodingView.addPin(pin9);
+  geocodingView.addPin(pin9);
+  geocodingView.addPin(pin9);
+  geocodingView.addPin(pin9);  
+  
+  const pin10 = geocodingView.getWorldCoordinates(45.7337965, 4.8762295);
+  geocodingView.addPin(pin10);
+  geocodingView.addPin(pin10);
+  geocodingView.addPin(pin10);
+  geocodingView.addPin(pin10);  
+  
+  const pin11 = geocodingView.getWorldCoordinates(45.7346081, 4.8691166);
+  geocodingView.addPin(pin11);
+  geocodingView.addPin(pin11);
+  geocodingView.addPin(pin11);
+  geocodingView.addPin(pin11);
 
 });
 

@@ -2,7 +2,8 @@
 
 //Components
 import { TilesManager } from '../../Components/Components';
-import { Widgets, Components, itowns, proj4, THREE, jquery, LayersDeckGL, Deck } from '../../index';
+import { Widgets, Components, itowns, proj4, THREE, jquery, LayersDeckGL, Deck, DataFilterExtension } from '../../index';
+import { from3946to4326, from4326to3946 } from "./conversion";
 const ModuleView = Widgets.Components.ModuleView;
 const $3DTemporalBatchTable = Widgets.$3DTemporalBatchTable;
 const $3DTemporalBoundingVolume = Widgets.$3DTemporalBoundingVolume;
@@ -10,6 +11,7 @@ const $3DTemporalTileset = Widgets.$3DTemporalTileset;
 
 import './AllWidget.css';
 
+let deckgl = undefined;
 /**
  * Represents the base HTML content of a demo for UD-Viz and provides methods to
  * dynamically add module views.
@@ -65,7 +67,7 @@ export class AllWidget {
       bottom: 0;
     }
     #container > * {
-      position: absolute;
+      
       top: 0;
       left: 0;
       width: 100%;
@@ -391,11 +393,11 @@ export class AllWidget {
     return document.getElementById(this.getModuleButtonId(moduleId));
   }
 
-  clamp(val, min, max){
-    if( val >= max ) val = max;
-    else if(val <= min) val = min;
-    return val; 
-  } 
+  clamp(val, min, max) {
+    if (val >= max) val = max;
+    else if (val <= min) val = min;
+    return val;
+  }
 
   /**
    * Adds WMS elevation Layer of Lyon in 2012 and WMS imagery layer of Lyon in 2009 (from Grand Lyon data).
@@ -483,10 +485,10 @@ export class AllWidget {
         } else {
           console.warn(
             'The 3D Tiles extension ' +
-              extensionsConfig[i] +
-              ' specified in generalDemoConfig.json is not supported ' +
-              'by UD-Viz yet. Only 3DTILES_temporal and ' +
-              '3DTILES_batch_table_hierarchy are supported.'
+            extensionsConfig[i] +
+            ' specified in generalDemoConfig.json is not supported ' +
+            'by UD-Viz yet. Only 3DTILES_temporal and ' +
+            '3DTILES_batch_table_hierarchy are supported.'
           );
         }
       }
@@ -570,7 +572,7 @@ export class AllWidget {
     this.update3DView();
     return layers;
   }
-  
+
   /**
    * Initializes the iTowns 3D view according the config. 
    */
@@ -581,7 +583,7 @@ export class AllWidget {
     proj4.default.defs(
       'EPSG:3946',
       '+proj=lcc +lat_1=45.25 +lat_2=46.75' +
-        ' +lat_0=46 +lon_0=3 +x_0=1700000 +y_0=5200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
+      ' +lat_0=46 +lon_0=3 +x_0=1700000 +y_0=5200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
     );
 
     // Define geographic extent: CRS, min/max X, min/max Y
@@ -597,7 +599,6 @@ export class AllWidget {
       min_y,
       max_y
     );
-
     // Get camera placement parameters from config
     let coordinates = this.extent.center();
     if (
@@ -657,6 +658,55 @@ export class AllWidget {
 
     // Set sky color to blue
     this.view.mainLoop.gfxEngine.renderer.setClearColor(0x6699cc, 1);
+
+    // this.view.onMovementCallback = () => {
+    //   if (deckgl == undefined) return;
+
+    //   const cam3D = this.view.camera.camera3D;
+
+    //   const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
+
+
+    //   // ici on récupère des coordonées en 3948
+    //   const pos = from3946to4326([cam3D.position.x, cam3D.position.y]);
+      
+
+
+    //   let udvizTargLat = cam3D.position.x;
+    //   let udvizTargLag = cam3D.position.y;
+
+    //   let udvizPrevLat = prev.coord.x;
+    //   let udvizPrevLag = prev.coord.y;
+      
+    //   const udvizPrevPos = from3946to4326([udvizPrevLat, udvizPrevLag]);
+    //   const udvizTargPos = from3946to4326([udvizTargLat, udvizTargLag]);
+
+    //   let translationX = udvizTargPos[0] - udvizPrevPos[0];
+    //   let translationY = udvizTargPos[1] - udvizPrevPos[1];
+   
+    //   let deckPrevLat = deckgl.props.initialViewState.latitude;
+    //   let deckPrevLag = deckgl.props.initialViewState.longitude;
+
+    //   console.log(translationX, translationY)
+
+    //   let deckTargLat =  deckPrevLat + translationX; 
+    //   let deckTargLag =  deckPrevLag + translationY; 
+
+    //   deckgl.setProps({
+    //     initialViewState: {
+    //       longitude: deckTargLag,
+    //       latitude: deckTargLat,
+    //       zoom: 12
+    //     }
+    //   })
+
+      // const newCoords = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
+
+      // console.log("cam3D: ", cam3D);
+      // console.log("prev: ", prev);
+
+      // deckgl ne fonctionne qu'en 4326
+    // }
   }
   /*
    * Updates the 3D view by notifying iTowns that it changed (e.g. because a layer has been added).
@@ -791,66 +841,64 @@ export class AllWidget {
     return 'AUTHENTICATION_MODULE';
   }
 
-  deckglLayers(){
-    return new Deck({
-        // mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-        initialViewState: {
-          longitude: 4.828491,
-          latitude: 45.756026,
-          zoom: 11,
-          maxZoom: 20,
-          pitch: 30,
-          bearing: 0
-        },  
-        canvas: 'deck-canvas',
-        width: '100%',
-        height: '100%',
-        map: false,
-        controller: true,
-        onViewStateChange: ({viewState}) => {
-          const cam3D = this.view.camera.camera3D;
-          const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
-          const newPos = prev;
-          newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0);
-      
-          // newPos.range = 64118883.098724395 / (2**(viewState.zoom-1));
-          // newPos.range = 64118883 / (2**(viewState.zoom-1)); // 64118883 is Range at Z=1 
-          newPos.heading = viewState.bearing;
-          // for some reason I cant access Math.clamp
-          newPos.tilt = this.clamp((90 - viewState.pitch), 0, 90); 
-      
-          itowns.CameraUtils.transformCameraToLookAtTarget(this.view, cam3D, newPos);
-          // this.view.notifyChange();
-          // cam3D.updateMatrixWorld();
-          // We can set pitch and bearing to 0 to disable tilting and turning 
-          // viewState.pitch = 0;
-          // viewState.bearing = 0;
-      
-          return viewState;
-        },
-        layers: [new LayersDeckGL.GeoJsonLayer(
-          {
-            id: 'GeoJsonLayer',
-            data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
-            extruded: true,
-            filled: true,
-            getElevation: 30,
-            getFillColor: [231, 111, 81, 256],
-            getPointRadius: 12,
-            getText: f => f.properties.nom,
-            getTextSize: 11,
-            getTextColor: [231, 111, 81, 256],
-            getTextAlignmentBaseline : 'bottom',
-            lineWidthMinPixels: 2,
-            lineWidthScale: 20,
-            pointRadiusUnits: 'pixels',
-            pointType: 'circle+text',
-            stroked: false,
-            pickable: true,
-            autoHighlight: true,
-          }
-        )]
-      });
-    }
-  
+
+  deckglLayers() {
+
+    deckgl = new Deck({
+      initialViewState: {
+        longitude: 4.850915114844566,
+        latitude: 45.743705537727045,
+        zoom: 13.45,
+        maxZoom: 20,
+        pitch: 0,
+        bearing: 0
+      },
+      canvas: 'deck-canvas',
+      width: '100%',
+      height: '100%',
+      map: false,
+      controller: true,
+      onViewStateChange: ({ viewState }) => {
+        const cam3D = this.view.camera.camera3D;
+        const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
+        const newPos = prev;
+        newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0).as('EPSG:3946');
+
+        newPos.heading = viewState.bearing;
+        // newPos.tilt = this.clamp((90 - viewState.pitch), 0, 90);
+        newPos.tilt = 90
+        itowns.CameraUtils.transformCameraToLookAtTarget(this.view, cam3D, newPos);
+
+
+        return viewState;
+      },
+      layers: [new LayersDeckGL.GeoJsonLayer(
+        {
+          id: 'GeoJsonLayer',
+          data: 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=car_care.carcmp_latest&outputFormat=application/json; subtype=geojson&SRSNAME=EPSG:4326',
+          extruded: true,
+          filled: true,
+          getElevation: 30,
+          getFillColor: [0, 0, 256, 90],
+          getPointRadius: 10,
+          getText: f => f.properties.nom,
+          getTextSize: 11,
+          getTextColor: [0, 0, 256, 256],
+          getTextAlignmentBaseline: 'bottom',
+          lineWidthMinPixels: 2,
+          lineWidthScale: 20,
+          pointRadiusUnits: 'pixels',
+          pointType: 'circle',
+          stroked: false,
+          pickable: true,
+          autoHighlight: true,
+          // filtering
+          getFilterValue: f =>  parseInt(f.properties.address.postalCode),
+          filterRange: [69000, 69100],
+          extensions: [new DataFilterExtension({filterSize: 1})]
+        }
+      )]
+    });
+  }
+
 }

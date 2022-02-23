@@ -25,6 +25,7 @@
   "homepage": "https://github.com/VCityTeam/UD-Viz/",
   "dependencies": {
     "@deck.gl/core": "^8.5.0",
+    "@deck.gl/extensions": "^8.6.8",
     "@deck.gl/layers": "^8.5.0",
     "d3": "^7.0.1",
     "detect-collisions": "^2.5.2",
@@ -32,7 +33,7 @@
     "howler": "^2.2.3",
     "itowns": "2.35.0",
     "jquery": "^3.6.0",
-    "proj4": "^2.7.0",
+    "proj4": "^2.7.5",
     "socket.io-client": "^4.0.0",
     "three": "0.131.3",
     "vis-data": "^7.1.2",
