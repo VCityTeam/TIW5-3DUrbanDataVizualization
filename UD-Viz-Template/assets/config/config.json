@@ -25,10 +25,10 @@
     "link": "link"
   }, 
   "extents": {
-    "min_x": "1840210",
-    "max_x": "1847658",
-    "min_y": "5171200",
-    "max_y": "5175665.27"
+    "min_x": "1837860.980127206",
+    "max_x": "1851647",
+    "min_y": "5169347.4265999",
+    "max_y": "5180575"
   },
   "projection": "EPSG:3946",
   "background_image_layer": {
