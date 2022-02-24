@@ -878,7 +878,7 @@ export class AllWidget {
         const prev = itowns.CameraUtils.getTransformCameraLookingAtTarget(this.view, cam3D);
         const newPos = prev;
         newPos.coord = new itowns.Coordinates('EPSG:4326', viewState.longitude, viewState.latitude, 0).as('EPSG:3946');
-
+        newPos.range = 64118883.098724395 / (2**(viewState.zoom-0.0002) /1.15)
         newPos.heading = viewState.bearing;
         // newPos.tilt = this.clamp((90 - viewState.pitch), 0, 90);
         newPos.tilt = 90
